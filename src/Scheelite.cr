@@ -1,15 +1,21 @@
 require "file"
 require "yaml"
+require "json"
 require "http/client"
 require "pinger"
 
-CONFIG_PATH = "./config.yaml"
+require "./Scheelite/Available.cr"
 
-class ScheeliteConfig
-  YAML.mapping(
-    webhook_url: String,
-    pinged: Array(String)
-  )
+CONFIG_PATH = "./config.yaml"
+AVAILABLE_PATH = "./available.json"
+
+module Scheelite
+  class ScheeliteConfig
+    YAML.mapping(
+      webhook_url: String,
+      pinged: Array(String)
+    )
+  end
 end
 
 if !File.exists? CONFIG_PATH
@@ -23,19 +29,26 @@ if !File.exists? CONFIG_PATH
   config.close
 end
 
-File.open(CONFIG_PATH) do |file|
-  config = ScheeliteConfig.from_yaml(file)
+available_repo = Scheelite::AvailableRepository.new(AVAILABLE_PATH)
+
+File.open(CONFIG_PATH) do |config_file|
+  config = Scheelite::ScheeliteConfig.from_yaml(config_file)
 
   loop do
-    config.pinged.each do |server|
-      pinger = Pinger.new server, count: 4
-      puts "sent ping to #{server}"
+    config.pinged.each do |address|
+      pinger = Pinger.new address, count: 4
 
       if !pinger.ping
-        response = HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{server}` is currently down! \" }"
+        response = HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{address}` is currently down! \" }"
+        puts "ng"
+        available_repo.report(address, false)
+      else
+        puts "ok"
+        available_repo.report(address, true)
       end
     end
 
+    available_repo.flush
     sleep 10.minutes
   end
 end
