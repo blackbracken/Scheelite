@@ -11,3 +11,7 @@ targets:
 crystal: 0.32.1
 
 license: MIT
+
+dependencies:
+  pinger:
+    github: spider-gazelle/pinger

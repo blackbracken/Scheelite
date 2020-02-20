@@ -1,0 +1,6 @@
+version: 1.0
+shards:
+  pinger:
+    github: spider-gazelle/pinger
+    version: 1.0.1
+
