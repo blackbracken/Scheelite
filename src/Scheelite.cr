@@ -5,23 +5,37 @@ require "pinger"
 
 CONFIG_PATH = "./config.yaml"
 
-if !File.exists?(CONFIG_PATH)
+class ScheeliteConfig
+  YAML.mapping(
+    webhook_url: String,
+    pinged: Array(String)
+  )
+end
+
+if !File.exists? CONFIG_PATH
   config = File.open CONFIG_PATH, "w"
-  config.puts <<-DEFAULT_CONFIG
-    Slack:
-      WebhookURL: "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    Pinged:
+  config.puts <<-YAML
+    webhook_url: "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    pinged:
       - "xxx.xxx.xxx.xxx"
       - "google.com"
-    DEFAULT_CONFIG
+    YAML
   config.close
 end
 
 File.open(CONFIG_PATH) do |file|
-  config = YAML.parse file
-  url = config["Slack"]["WebhookURL"].as_s
-  pinger = Pinger.new("google.com", count: 4)
-  response = HTTP::Client.post url, body: "{ \"text\": \"Hello, yoneyan #{pinger.ping}\" }"
-  
-  puts response.body
+  config = ScheeliteConfig.from_yaml(file)
+
+  loop do
+    config.pinged.each do |server|
+      pinger = Pinger.new server, count: 4
+      puts "sent ping to #{server}"
+
+      if !pinger.ping
+        response = HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{server}` is currently down! \" }"
+      end
+    end
+
+    sleep 10.minutes
+  end
 end
