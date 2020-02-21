@@ -40,7 +40,7 @@ module Scheelite
 
     def calc_available_percent(address : String): Float32
       if !@hash.has_key? address
-        100.to_f32
+        return 100.to_f32
       end
 
       trying = @hash[address].count_trying
