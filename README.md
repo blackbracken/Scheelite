@@ -1,6 +1,5 @@
 # Scheelite
-
-TODO: write
+A slack bot to monitor status of servers
 
 ## Config
 ```yaml
@@ -14,4 +13,4 @@ pinged:
 ```
 
 ## Usage
-`./scheelite`
+`./Scheelite`

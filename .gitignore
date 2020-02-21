@@ -4,5 +4,6 @@
 /.shards/
 *.dwarf
 
+Scheelite
 config.yml
 available.json
