@@ -6,6 +6,10 @@ A slack bot to monitor status of servers
 # webhook URL for slack bot
 webhook_url: "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxx"
 
+# a prefix of messages
+# <!channel> <!here> <![USER_ID]> etc.
+mention: "<!channel>"
+
 # addresses to be monitored
 pinged:
   - "google.com"

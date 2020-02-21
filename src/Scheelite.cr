@@ -14,6 +14,7 @@ if !File.exists? CONFIG_PATH
   File.open(CONFIG_PATH, "w") do |config_file|
     config_file.puts <<-YAML
       webhook_url: "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      mention: "<!channel>"
       pinged:
         - "xxx.xxx.xxx.xxx"
         - "google.com"
@@ -41,10 +42,10 @@ loop do
 
       if is_available
         # down -> up
-        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :signal_strength: The server `#{address}` is currently up! Available: #{available_percent}\" }"
+        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :signal_strength: The server `#{address}` is currently up! Available: #{available_percent}\" }"
       else
         # up -> down
-        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{address}` is currently down! Available: #{available_percent}\" }"
+        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :warning: The server `#{address}` is currently down! Available: #{available_percent}\" }"
       end
     end
   end
