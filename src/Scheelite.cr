@@ -29,18 +29,26 @@ available_repo = Scheelite::AvailableRepository.new(AVAILABLE_PATH)
 
 loop do
   config.pinged.each do |address|
-    pinger = Pinger.new address, count: 4
+    is_available = Pinger.new(address, count: 4).ping
+    last_available = available_repo.last_available address
 
-    if !pinger.ping
-      response = HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{address}` is currently down! \" }"
-      puts "ng"
-      available_repo.report(address, false)
-    else
-      puts "ok"
-      available_repo.report(address, true)
+    available_repo.report(address, is_available)
+
+    puts "#{address} is #{is_available ? "up" : "down"}"
+
+    if is_available ^ last_available
+      available_percent = "#{available_repo.calc_available_percent(address).to_s}%"
+
+      if is_available
+        # down -> up
+        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :signal_strength: The server `#{address}` is currently up! Available: #{available_percent}\" }"
+      else
+        # up -> down
+        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"<!channel> :warning: The server `#{address}` is currently down! Available: #{available_percent}\" }"
+      end
     end
   end
 
   available_repo.flush
-  sleep 10.minutes
+  sleep 5.minutes
 end

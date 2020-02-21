@@ -37,6 +37,29 @@ module Scheelite
         json_file.puts @hash.to_json
       end
     end
+
+    def calc_available_percent(address : String): Float32
+      if !@hash.has_key? address
+        100.to_f32
+      end
+
+      trying = @hash[address].count_trying
+      successed = @hash[address].count_successed
+
+      if trying == 0
+        100.to_f32
+      else
+        100 * (successed.to_f32 / trying.to_f32)
+      end
+    end
+
+    def last_available(address : String): Bool 
+      if @hash.has_key? address
+        @hash[address].last_available
+      else
+        true
+      end
+    end
   end
 
   class Available
