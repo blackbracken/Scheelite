@@ -4,5 +4,5 @@
 /.shards/
 *.dwarf
 
-config.yaml
+config.yml
 available.json
