@@ -17,4 +17,6 @@ pinged:
 ```
 
 ## Usage
+Download binary from [releases](https://github.com/blackbracken/Scheelite/releases) or build this repository.
+
 `./Scheelite`
