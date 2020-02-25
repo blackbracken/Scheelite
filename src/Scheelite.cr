@@ -28,28 +28,25 @@ config_file.close
 
 available_repo = Scheelite::AvailableRepository.new(AVAILABLE_PATH)
 
-loop do
-  config.pinged.each do |address|
-    is_available = Pinger.new(address, count: 4).ping
-    last_available = available_repo.last_available address
+config.pinged.each do |address|
+  is_available = Pinger.new(address, count: 4).ping
+  last_available = available_repo.last_available address
 
-    available_repo.report(address, is_available)
+  available_repo.report(address, is_available)
 
-    puts "#{address} is #{is_available ? "up" : "down"}"
+  puts "#{address} is #{is_available ? "up" : "down"}"
 
-    if is_available ^ last_available
-      available_percent = "#{available_repo.calc_available_percent(address).to_s}%"
+  if is_available ^ last_available
+    available_percent = "#{available_repo.calc_available_percent(address).to_s}%"
 
-      if is_available
-        # down -> up
-        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :signal_strength: The server `#{address}` is currently up! Available: #{available_percent}\" }"
-      else
-        # up -> down
-        HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :warning: The server `#{address}` is currently down! Available: #{available_percent}\" }"
-      end
+    if is_available
+      # down -> up
+      HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :signal_strength: The server `#{address}` is currently up! Available: #{available_percent}\" }"
+    else
+      # up -> down
+      HTTP::Client.post config.webhook_url, body: "{ \"text\": \"#{config.mention} :warning: The server `#{address}` is currently down! Available: #{available_percent}\" }"
     end
   end
-
-  available_repo.flush
-  sleep 5.minutes
 end
+
+available_repo.flush
